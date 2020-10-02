@@ -50,8 +50,9 @@ def run_ec(rec):
     exp_id = rec['experiment_id'][0]
 
     cv_table = json.load(open(cv_path, 'r'))["CV"]
-
-    if act_id not in cv_table['experiment_id'][exp_id]['activity_id'][0]:
+    if exp_id not in cv_table['experiment_id']:
+        return False
+    elif act_id not in cv_table['experiment_id'][exp_id]['activity_id'][0]:
         return False
     else:
         return True
