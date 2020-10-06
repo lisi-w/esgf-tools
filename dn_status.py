@@ -58,6 +58,6 @@ def main():
     lines = []
     for dn in expirations.keys():
         lines.append("The ssl certificate for " + dn + " will expire on " + expirations[dn])
-
+    emails = ["e.witham@columbia.edu", ]
     for email in emails:
         send_msg(lines, email)

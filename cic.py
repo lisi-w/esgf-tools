@@ -508,14 +508,16 @@ if __name__ == '__main__':
         for institution in institution_list:
             if institution in skips:
                 continue
-            if "ceda" in node:
-                url = uk_url
             else:
                 base = "http://{}/esg-search/search?".format(node)
                 args = "project=CMIP6&limit={}&offset={}&format=application%2fsolr%2bjson&institution_id={}&replica=false&fields=instance_id,number_of_files,_timestamp,data_node,replica,institution_id,latest,version,retracted,id,activity_drs,activity_id,source_id,experiment_id"
                 url = base + args
             print("Fetching originals...")
-            originals, tally = get_batch(url, institution)
+            try:
+                originals, tally = get_batch(url, institution)
+            except:
+                if "ceda" in node:
+                    originals, tally = get_batch(uk_url, institution)
             if tally == 0:
                 continue
             else:
@@ -570,7 +572,6 @@ if __name__ == '__main__':
     dkrz = []
     nci = []
     llnl = []
-    print(inconsistencies.keys())
     acceptable = [ORIGINAL_ERR, LATEST_ERR, RETRACT_ERR]
     for err in inconsistencies.keys():
         if err not in acceptable:
@@ -608,10 +609,10 @@ if __name__ == '__main__':
     summ = summary()
     try:
         send_data(summ, 'e.witham@columbia.edu', 'gmail', llnl)
-        send_data(summ, 'amysash2006@gmail.com', 'gmail', llnl)
+        # send_data(summ, 'amysash2006@gmail.com', 'gmail', llnl)
     except Exception as ex:
         send_data(summ, 'e.witham@columbia.edu', 'gmail')
-        send_data(summ, 'amysash2006@gmail.com', 'gmail')
+        # send_data(summ, 'amysash2006@gmail.com', 'gmail')
 
     # put more info in readme to explain error types
 
