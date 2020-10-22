@@ -11,7 +11,7 @@ import gzip
 import shutil
 
 TEST = False
-EMAIL = False
+EMAIL = True
 NUM_RETR = 10000
 ORIGINAL_ERR = "No original record:"
 NOF_ERR = "Inconsistent number of files (esgf replica issue):"
@@ -512,12 +512,10 @@ if __name__ == '__main__':
                 base = "http://{}/esg-search/search?".format(node)
                 args = "project=CMIP6&limit={}&offset={}&format=application%2fsolr%2bjson&institution_id={}&replica=false&fields=instance_id,number_of_files,_timestamp,data_node,replica,institution_id,latest,version,retracted,id,activity_drs,activity_id,source_id,experiment_id"
                 url = base + args
-            print("Fetching originals...")
-            try:
-                originals, tally = get_batch(url, institution)
-            except:
                 if "ceda" in node:
-                    originals, tally = get_batch(uk_url, institution)
+                    url = uk_url
+            print("Fetching originals...")
+            originals, tally = get_batch(url, institution)
             if tally == 0:
                 continue
             else:
@@ -609,12 +607,11 @@ if __name__ == '__main__':
     summ = summary()
     try:
         send_data(summ, 'e.witham@columbia.edu', 'gmail', llnl)
-        # send_data(summ, 'amysash2006@gmail.com', 'gmail', llnl)
+        send_data(summ, 'amysash2006@gmail.com', 'gmail')
     except Exception as ex:
         send_data(summ, 'e.witham@columbia.edu', 'gmail')
-        # send_data(summ, 'amysash2006@gmail.com', 'gmail')
+        send_data(summ, 'amysash2006@gmail.com', 'gmail')
 
-    # put more info in readme to explain error types
 
     if len(warnings) > 2:
         pass
