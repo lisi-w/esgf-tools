@@ -82,9 +82,17 @@ def get_expirations():
 
 def notify(notifs, exps):
     for dn in exps:
-        if exps[dn]['until'] < MONTH and not notifs[dn][FIRST]:
-            msg = "The ssl certificate for " + dn + " will expire in less than 28 days. Expiration date: " + exps[dn]['string']
+        if exps[dn]['until'] < TWO_DAYS and not notifs[dn][THIRD]:
+            msg = "The ssl certificate for " + dn + " will expire in less than 2 days. Expiration date: " + exps[dn]['string']
             send_msg(msg, DN_EMAILS[dn])
+            notifs[dn][THIRD] = True
+        elif exps[dn]['until'] < TEN_DAYS and not notifs[dn][SECOND]:
+            msg = "The ssl certificate for " + dn + " will expire in less than 10 days. Expiration date: " + exps[dn]['string']
+            send_msg(msg, DN_EMAILS[dn])
+            notifs[dn][SECOND] = True
+        elif exps[dn]['until'] < MONTH and not notifs[dn][FIRST]:
+            msg = "The ssl certificate for " + dn + " will expire in less than 28 days. Expiration date: " + exps[dm]['string']
+            send_msg((msg, DN_EMAILS[dn]))
             notifs[dn][FIRST] = True
     return notifs
 
