@@ -11,7 +11,7 @@ import gzip
 import shutil
 
 TEST = False
-EMAIL = True
+EMAIL = False
 NUM_RETR = 10000
 ORIGINAL_ERR = "No original record:"
 NOF_ERR = "Inconsistent number of files (esgf replica issue):"
@@ -25,7 +25,11 @@ EC_ERR = "Failed experiment_id check:"
 duplicates = []
 INDEX_NODE = "esgf-node.llnl.gov"
 CERT = "/p/user_pub/publish-queue/certs/certificate-file"
-CMOR_PATH = "/home/ewitham/cmor/Tables"
+CMOR_PATH = "/export/witham3/cmor"
+instance_file = open("need_replicas.txt", "w")
+
+def save_to_list(instance):
+    instance_file.write(instance + "\n")
 
 
 def run_ac(input_rec):
@@ -255,6 +259,7 @@ def find_inconsistencies(batch, institution):
         replica_retracted = False
         failed_ac = False
         failed_ec = False
+        replica_needed = True
         for member in group:
             if not member["replica"]:  # check if member is original record
                 if original is None:
@@ -285,6 +290,7 @@ def find_inconsistencies(batch, institution):
             else:
                 if member['retracted']:
                     replica_retracted = True
+                replica_needed = False
             if not run_ac(member):
                 failed_ac = True
             elif not run_ec(member):
@@ -320,6 +326,8 @@ def find_inconsistencies(batch, institution):
             flag(institution, AC_ERR, group)
         elif failed_ec:
             flag(institution, EC_ERR, group)
+        if replica_needed:
+            save_to_list(instance)
 
     print("Done.")
 
@@ -401,7 +409,8 @@ def send_data(message, to_email, server, attachments=None):
     print("Sending email...")
 
     msg = MIMEMultipart()
-    from_email = "elysiawitham@gmail.com"
+    # from_email = "elysiawitham@gmail.com"
+    from_email = "witham3@llnl.gov"
     msg['From'] = from_email
     msg['To'] = to_email
     if server != 'gmail':
@@ -418,9 +427,11 @@ def send_data(message, to_email, server, attachments=None):
                 encoders.encode_base64(payload)
                 payload.add_header('Content-Decomposition', 'attachment', filname=attachment)
                 msg.attach(payload)
-        s = smtplib.SMTP('smtp.gmail.com', 587)  # llnl smtp: nospam.llnl.gov
+        # s = smtplib.SMTP('smtp.gmail.com', 587)  # llnl smtp: nospam.llnl.gov
+        s = smtplib.SMTP('nospam.llnl.gov')
+        s.ehlo()
         s.starttls()
-        s.login(from_email, "")  # fill in passwd before running
+        # s.login(from_email, "")  # fill in passwd before running
         text = msg.as_string()
         s.sendmail(from_email, to_email, text)
         s.quit()
@@ -445,7 +456,7 @@ def gen_ids(d):
             for recs in inconsistencies[err][node]:
                 rec = recs[0]
                 instance = rec["instance_id"]
-                id = instance + "|" + node + "\n"
+                id = instance + "|" + node
                 l.append(id)
     return rm, lf
 
@@ -467,7 +478,6 @@ if __name__ == '__main__':
     inconsistencies = {}
     inconsistencies[ORIGINAL_ERR] = {}
     inconsistencies[NOF_ERR] = {}
-    inconsistencies[NOF_ERR2] = {}
     inconsistencies[LATEST_ERR] = {}
     inconsistencies[RETRACT_ERR] = {}
     inconsistencies["Multiple originals"] = {}
@@ -601,6 +611,7 @@ if __name__ == '__main__':
     shutil.copyfileobj(myfile, zipfile)
     myfile.close()
     zipfile.close()
+    instance_file.close()
     with open('E3SM.json', 'w+') as d:
         json.dump(E3SM_f, d, indent=4)
 

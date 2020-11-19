@@ -16,8 +16,12 @@ FIRST = '28 days'
 SECOND = '10 days'
 THIRD = '2 days'
 DN_EMAILS = {}
+i = 0
 for dn in DN_LIST:
     DN_EMAILS[dn] = "elysiawitham@gmail.com"
+    if (i % 2) == 0:
+        DN_EMAILS[dn] = "ames4@llnl.gov"
+    i += 1
 
 URL = "https://aims4.llnl.gov/prometheus/api/v1/query?query=probe_ssl_earliest_cert_expiry%20-%20time()"
 
