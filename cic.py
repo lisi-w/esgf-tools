@@ -410,7 +410,7 @@ def send_data(message, to_email, server, attachments=None):
 
     msg = MIMEMultipart()
     # from_email = "elysiawitham@gmail.com"
-    from_email = "witham3@llnl.gov"
+    from_email = "witham3@llnl.gov" #ames4@llnl.gov
     msg['From'] = from_email
     msg['To'] = to_email
     if server != 'gmail':
