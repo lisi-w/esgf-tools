@@ -10,4 +10,4 @@ destpath=/p/user_pub/publish-queue/inconsistencies/$thedate
 
 mkdir -p $destpath
 
-python3 cic.py $destpath /export/witham3/cmor/
+python3 cic.py $destpath/ /export/witham3/cmor/
