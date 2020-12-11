@@ -10,6 +10,11 @@ from email import encoders
 import gzip
 import shutil
 
+
+if len(sys.argv) < 3:
+    print("Missing args! \nusage: python3 cic.py </write/directory/> </path/to/cmor/tables/> \nNOTE: use absolute paths and be sure to include the ending '/'.")
+    exit(1)
+
 TEST = False
 EMAIL = False
 NUM_RETR = 10000
@@ -25,15 +30,15 @@ EC_ERR = "Failed experiment_id check:"
 duplicates = []
 INDEX_NODE = "esgf-node.llnl.gov"
 CERT = "/p/user_pub/publish-queue/certs/certificate-file"
-CMOR_PATH = "/export/witham3/cmor"
-instance_file = open("need_replicas.txt", "w")
+CMOR_PATH = sys.argv[2]
+instance_file = open(directory + "need_replicas.txt", "w")
 
 def save_to_list(instance):
     instance_file.write(instance + "\n")
 
 
 def run_ac(input_rec):
-    cv_path = "{}/CMIP6_CV.json".format(CMOR_PATH)
+    cv_path = "{}CMIP6_CV.json".format(CMOR_PATH)
     jobj = json.load(open(cv_path))["CV"]
     sid_dict = jobj["source_id"]
 
@@ -48,7 +53,7 @@ def run_ac(input_rec):
 
 
 def run_ec(rec):
-    cv_path = "{}/CMIP6_CV.json".format(CMOR_PATH)
+    cv_path = "{}CMIP6_CV.json".format(CMOR_PATH)
 
     act_id = rec['activity_drs'][0]
     exp_id = rec['experiment_id'][0]
@@ -501,6 +506,7 @@ if __name__ == '__main__':
     counts = [0, 0, 0, 0]
     skips = []
 
+    directory = sys.argv[1]
     # retracted=false
     # look at IPSL for latest false originals
     search_url = "http://esgf-node.llnl.gov/esg-search/search?project=CMIP6&latest=true&retracted=false&limit={}&offset={}&format=application%2fsolr%2bjson&replica=true&institution_id={}&fields=instance_id,number_of_files,_timestamp,data_node,replica,institution_id,latest,retracted,id,activity_drs,activity_id,source_id,experiment_id"
@@ -574,7 +580,7 @@ if __name__ == '__main__':
             warnings.append("Error fetching inconsistencies for " + institution + ": " + str(ex))
             continue
 
-    myfile = open('inconsistencies.json', 'w+')
+    myfile = open(directory + 'inconsistencies.json', 'w+')
     lst = []
     ceda = []
     dkrz = []
@@ -586,7 +592,7 @@ if __name__ == '__main__':
             continue
         else:
             for node in inconsistencies[err].keys():
-                fn = node + "-" + err + ".json"
+                fn = directory + node + "-" + err + ".json"
                 with open(fn, 'w+') as fp:
                     try:
                         fp.write(fn)
@@ -607,12 +613,12 @@ if __name__ == '__main__':
         print(warnings)
         exit(1)
     json.dump(inconsistencies, myfile, indent=4)  # saves data as json file
-    zipfile = gzip.open("inconsistencies.json.gz", 'w+')
+    zipfile = gzip.open(directory + "inconsistencies.json.gz", 'w+')
     shutil.copyfileobj(myfile, zipfile)
     myfile.close()
     zipfile.close()
     instance_file.close()
-    with open('E3SM.json', 'w+') as d:
+    with open(directory + 'E3SM.json', 'w+') as d:
         json.dump(E3SM_f, d, indent=4)
 
     summ = summary()
