@@ -4,4 +4,10 @@ cd /export/witham3/etools
 export PATH=~/anaconda2/bin:$PATH
 . ~/.bashrc
 conda activate cic
-python3 cic.py /p/user_pub/publish-queue/inconsistencies/ /export/witham3/cmor/
+
+thedate=`date +%y%m%d_%H%M`
+destpath=/p/user_pub/publish-queue/inconsistencies/$thedate
+
+mkdir -p $destpath
+
+python3 cic.py $destpath /export/witham3/cmor/
